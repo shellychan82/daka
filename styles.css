@@ -1,0 +1,512 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f7;
+}
+
+.container {
+    max-width: 600px;
+    margin: 1rem auto;
+    padding: 0 1rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    color: #1d1d1f;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+}
+
+.quick-action {
+    background: #007AFF;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.quick-action:hover {
+    background: #0056b3;
+}
+
+#task-form {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+input[type="text"],
+input[type="time"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+button {
+    background: #007AFF;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.calendar {
+    background: white;
+    border-radius: 12px;
+    padding: 0.8rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+#calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    padding: 0.5rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-size: 0.85rem;
+    color: #333;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    margin: auto;
+}
+
+.calendar-day.today {
+    color: #007AFF;
+    font-weight: 500;
+}
+
+.calendar-day.has-task {
+    position: relative;
+}
+
+.calendar-day.has-task::after {
+    content: '';
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    border: 2px solid #007AFF;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+}
+
+.calendar-day.today.has-task {
+    background: transparent;
+    color: #007AFF;
+}
+
+.calendar-day.today.has-task::after {
+    border-color: #007AFF;
+    border-width: 1px;
+}
+
+.calendar-day:nth-child(7n+1),
+.calendar-day:nth-child(7n) {
+    color: #333;
+}
+
+.calendar-day.other-month {
+    color: #999;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup.hidden {
+    display: none;
+}
+
+.popup-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+}
+
+.quick-section, .custom-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.duration-picker {
+    margin-top: 1rem;
+}
+
+h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.duration-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.duration-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.duration-options input[type="radio"] {
+    margin: 0;
+}
+
+.time-picker {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.time-scroll {
+    flex: 1;
+}
+
+.time-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+input[type="time"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    appearance: none;
+    background: #f5f5f7;
+}
+
+.popup-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+}
+
+.popup-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.popup-buttons button {
+    flex: 1;
+    padding: 0.8rem;
+}
+
+#task-details {
+    margin: 1rem 0;
+    text-align: left;
+}
+
+.task-detail-item {
+    background: #f5f5f7;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-detail-item h4 {
+    margin: 0;
+    color: #333;
+}
+
+.task-detail-time {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.3rem;
+}
+
+.calendar-day {
+    cursor: pointer;
+}
+
+.calendar-day.has-task {
+    position: relative;
+}
+
+.calendar-day.has-task::after {
+    content: '';
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    border: 2px solid #007AFF;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+}
+
+.task-detail-content {
+    flex: 1;
+}
+
+.delete-task {
+    background: #ff3b30;
+    color: white;
+    border: none;
+    width: auto;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.delete-task:hover {
+    background: #dc3545;
+}
+
+.calendar-title {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-align: left;
+    padding-left: 0.5rem;
+}
+
+/* 添加移动端适配样式 */
+@media screen and (max-width: 768px) {
+    .container {
+        max-width: 100%;
+        margin: 0.5rem auto;
+        padding: 0 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .quick-section, .custom-section {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .quick-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .quick-action {
+        flex: 1 1 calc(50% - 0.5rem);
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        min-width: calc(50% - 0.5rem);
+    }
+
+    .duration-options {
+        justify-content: space-between;
+    }
+
+    .duration-options label {
+        flex: 1 1 calc(33.33% - 0.5rem);
+        padding: 0.4rem;
+        font-size: 0.8rem;
+        justify-content: center;
+    }
+
+    .time-picker {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .time-scroll {
+        width: 100%;
+    }
+
+    input[type="time"] {
+        padding: 0.6rem;
+        font-size: 1rem;
+    }
+
+    .calendar {
+        padding: 0.5rem;
+        margin: 0 -0.5rem;
+        border-radius: 0;
+    }
+
+    .calendar-header {
+        font-size: 0.7rem;
+    }
+
+    #calendar-grid {
+        gap: 2px;
+        padding: 0.3rem;
+    }
+
+    .calendar-day {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .calendar-day.has-task::after {
+        width: 28px;
+        height: 28px;
+    }
+
+    .popup-content {
+        width: 85%;
+        padding: 1rem;
+    }
+
+    .task-detail-item {
+        padding: 0.6rem;
+    }
+
+    .delete-task {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* 添加更小屏幕的适配 */
+@media screen and (max-width: 320px) {
+    .duration-options label {
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+
+    .calendar-day {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+
+    .calendar-day.has-task::after {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* 补卡按钮样式 */
+.makeup-section {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.makeup-btn {
+    background: #34C759;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: auto;
+    margin: 0 auto;
+}
+
+.makeup-btn:hover {
+    background: #2AB050;
+}
+
+/* 补卡任务特殊标记 */
+.task-detail-item.makeup {
+    border-left: 3px solid #34C759;
+}
+
+/* 移动端适配补充 */
+@media screen and (max-width: 768px) {
+    .makeup-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+} 

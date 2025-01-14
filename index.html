@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日打卡</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>每日打卡</h1>
+        </header>
+
+        <!-- 快速打卡部分 -->
+        <div class="quick-section">
+            <h2>快速打卡</h2>
+            <div class="quick-actions">
+                <button class="quick-action" data-task="运动">运动</button>
+                <button class="quick-action" data-task="学习">学习</button>
+                <button class="quick-action" data-task="阅读">阅读</button>
+                <button class="quick-action" data-task="打卡">打卡</button>
+            </div>
+            <div class="duration-picker">
+                <h3>时长选择</h3>
+                <div class="duration-options">
+                    <label><input type="radio" name="duration" value="10"> 10分钟</label>
+                    <label><input type="radio" name="duration" value="15"> 15分钟</label>
+                    <label><input type="radio" name="duration" value="30"> 30分钟</label>
+                    <label><input type="radio" name="duration" value="60"> 60分钟</label>
+                    <label><input type="radio" name="duration" value="120"> 120分钟</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 自定义项目部分 -->
+        <div class="custom-section">
+            <h2>自定义项目</h2>
+            <form id="task-form">
+                <div class="form-group">
+                    <input type="text" id="task-name" placeholder="任务名称" required>
+                </div>
+                <div class="time-picker">
+                    <div class="time-scroll">
+                        <div class="time-label">开始时间</div>
+                        <input type="time" id="start-time" required>
+                    </div>
+                    <div class="time-scroll">
+                        <div class="time-label">结束时间</div>
+                        <input type="time" id="end-time" required>
+                    </div>
+                </div>
+                <button type="submit">添加任务</button>
+            </form>
+        </div>
+
+        <!-- 日历部分 -->
+        <div class="calendar">
+            <div class="calendar-title" id="calendar-title"></div>
+            <div class="calendar-header">
+                <span>周日</span>
+                <span>周一</span>
+                <span>周二</span>
+                <span>周三</span>
+                <span>周四</span>
+                <span>周五</span>
+                <span>周六</span>
+            </div>
+            <div id="calendar-grid"></div>
+        </div>
+    </div>
+
+    <!-- 激励弹窗 -->
+    <div id="motivation-popup" class="popup hidden">
+        <div class="popup-content">
+            <p id="motivation-message"></p>
+            <button onclick="closePopup()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div id="confirm-popup" class="popup hidden">
+        <div class="popup-content">
+            <h3>确认创建任务</h3>
+            <p id="confirm-message"></p>
+            <div class="popup-buttons">
+                <button onclick="confirmTask()">确认</button>
+                <button onclick="closeConfirmPopup()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务详情弹窗 -->
+    <div id="task-detail-popup" class="popup hidden">
+        <div class="popup-content">
+            <h3>任务详情</h3>
+            <div id="task-details"></div>
+            <button onclick="closeTaskDetailPopup()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 补卡弹窗 -->
+    <div id="makeup-popup" class="popup hidden">
+        <div class="popup-content">
+            <h3>补卡</h3>
+            <p>补卡日期：<span id="makeup-date"></span></p>
+            <div class="form-group">
+                <input type="text" id="makeup-task-name" placeholder="任务名称" required>
+            </div>
+            <div class="time-picker">
+                <div class="time-scroll">
+                    <div class="time-label">开始时间</div>
+                    <input type="time" id="makeup-start-time" required>
+                </div>
+                <div class="time-scroll">
+                    <div class="time-label">结束时间</div>
+                    <input type="time" id="makeup-end-time" required>
+                </div>
+            </div>
+            <div class="popup-buttons">
+                <button onclick="submitMakeup()">确认</button>
+                <button onclick="closeMakeupPopup()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
