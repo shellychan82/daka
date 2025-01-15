@@ -78,9 +78,7 @@ function renderCalendar() {
         dayElement.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (dayTasks.length > 0) {
-                showTaskDetails(dateString, dayTasks);
-            }
+            showTaskDetails(dateString, dayTasks);
         });
 
         calendarGrid.appendChild(dayElement);
@@ -105,20 +103,36 @@ function showTaskDetails(date, tasks) {
     
     if (!popup || !details) return;
     
-    details.innerHTML = `
+    let html = `
         <h3>任务详情</h3>
         <p>日期：${date}</p>
-        ${tasks.map(task => `
-            <div class="task-item">
-                <div>${task.name}</div>
-                <div>${task.startTime} - ${task.endTime}</div>
+    `;
+
+    if (tasks.length > 0) {
+        html += tasks.map(task => `
+            <div class="task-detail-item">
+                <div class="task-content">
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-time">${task.startTime} - ${task.endTime}</div>
+                </div>
                 <button onclick="deleteTask('${task.id}')" class="delete-btn">删除</button>
             </div>
-        `).join('')}
-        <button onclick="closeTaskDetailPopup()" class="btn-primary">关闭</button>
-    `;
-    
+        `).join('');
+    } else {
+        html += '<p>暂无任务</p>';
+    }
+
+    html += `<button onclick="closeTaskDetailPopup()" class="btn-primary">关闭</button>`;
+    details.innerHTML = html;
     popup.classList.remove('hidden');
+}
+
+// 关闭任务详情弹窗
+function closeTaskDetailPopup() {
+    const popup = document.getElementById('task-detail-popup');
+    if (popup) {
+        popup.classList.add('hidden');
+    }
 }
 
 // 删除任务
