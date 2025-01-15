@@ -426,5 +426,54 @@ function closeConfirmPopup() {
 // 在页面加载完成后添加工具按钮
 document.addEventListener('DOMContentLoaded', function() {
     addUtilityButtons();
-}); 
+});
+
+// 显示补卡表单
+function showMakeupForm(date) {
+    const popup = document.getElementById('makeup-popup');
+    document.getElementById('makeup-date').textContent = date;
+    popup.classList.remove('hidden');
+}
+
+// 处理补卡提交
+function submitMakeup() {
+    const date = document.getElementById('makeup-date').textContent;
+    const taskName = document.getElementById('makeup-task-name').value;
+    const startTime = document.getElementById('makeup-start-time').value;
+    const endTime = document.getElementById('makeup-end-time').value;
+    
+    if (!taskName || !startTime || !endTime) {
+        alert('请填写完整信息');
+        return;
+    }
+    
+    const newTask = {
+        id: Date.now(),
+        name: taskName,
+        startTime: startTime,
+        endTime: endTime,
+        date: date,
+        completed: true,
+        isMakeup: true
+    };
+    
+    if (validateTask(newTask)) {
+        tasks.push(newTask);
+        if (saveTasksToStorage(tasks)) {
+            closeMakeupPopup();
+            showTaskDetails(date, tasks.filter(task => task.date === date));
+            renderCalendar();
+        }
+    } else {
+        alert('任务数据无效，请重试');
+    }
+}
+
+// 关闭补卡弹窗
+function closeMakeupPopup() {
+    document.getElementById('makeup-popup').classList.add('hidden');
+    document.getElementById('makeup-task-name').value = '';
+    document.getElementById('makeup-start-time').value = '';
+    document.getElementById('makeup-end-time').value = '';
+}
 
