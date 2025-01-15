@@ -114,7 +114,7 @@ function showTaskDetails(date, dayTasks) {
     
     // 只在历史日期且一周内显示补卡按钮
     if (isWithinWeek) {
-        html += `<div class="makeup-btn-container"><button class="makeup-btn" onclick="showMakeupForm('${date}')">补卡</button></div>`;
+        html += `<div class="makeup-btn-container"><button class="makeup-btn" onclick="showMakeupPopup('${date}')">补卡</button></div>`;
     }
     
     if (dayTasks.length > 0) {
