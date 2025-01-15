@@ -97,32 +97,43 @@ function renderCalendar() {
 }
 
 // 显示任务详情
-function showTaskDetails(date, tasks) {
+function showTaskDetails(date, dayTasks) {
     const popup = document.getElementById('task-detail-popup');
     const details = document.getElementById('task-details');
     
     if (!popup || !details) return;
     
-    let html = `
-        <h3>任务详情</h3>
-        <p>日期：${date}</p>
-    `;
-
-    if (tasks.length > 0) {
-        html += tasks.map(task => `
-            <div class="task-detail-item">
-                <div class="task-content">
-                    <div class="task-name">${task.name}</div>
-                    <div class="task-time">${task.startTime} - ${task.endTime}</div>
+    const today = new Date();
+    const selectedDate = new Date(date);
+    const diffDays = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
+    
+    // 只在过去7天内显示补卡按钮，当天不显示
+    const isWithinWeek = diffDays > 0 && diffDays <= 7;
+    
+    let html = '<h3>任务详情</h3>';
+    
+    // 只在历史日期且一周内显示补卡按钮
+    if (isWithinWeek) {
+        html += `<div class="makeup-btn-container"><button class="makeup-btn" onclick="showMakeupForm('${date}')">补卡</button></div>`;
+    }
+    
+    if (dayTasks.length > 0) {
+        dayTasks.forEach(task => {
+            html += `
+                <div class="task-detail-item">
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        <div class="task-time">${task.startTime} - ${task.endTime}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTask('${task.id}', '${date}')">删除</button>
                 </div>
-                <button onclick="deleteTask('${task.id}')" class="delete-btn">删除</button>
-            </div>
-        `).join('');
+            `;
+        });
     } else {
         html += '<p>暂无任务</p>';
     }
 
-    html += `<button onclick="closeTaskDetailPopup()" class="btn-primary">关闭</button>`;
+    html += `<button onclick="closeTaskDetailPopup()" class="close-btn">关闭</button>`;
     details.innerHTML = html;
     popup.classList.remove('hidden');
 }
