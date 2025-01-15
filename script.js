@@ -165,7 +165,59 @@ function exportTasks() {
     }
 }
 
-// 添加导出和清理按钮到页面
+// 导出数据为JSON文件
+function exportDataToJson() {
+    const data = {
+        tasks: tasks,
+        exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `打卡记录_${new Date().toLocaleDateString()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// 导入JSON数据
+function importDataFromJson(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data && Array.isArray(data.tasks)) {
+                // 验证数据格式
+                const isValid = data.tasks.every(task => 
+                    task.id && 
+                    task.name && 
+                    task.startTime && 
+                    task.endTime && 
+                    task.date
+                );
+                
+                if (isValid) {
+                    if (confirm('导入将覆盖现有数据，是否继续？')) {
+                        tasks = data.tasks;
+                        saveTasksToStorage(tasks);
+                        renderCalendar();
+                        alert('数据导入成功！');
+                    }
+                } else {
+                    alert('数据格式不正确，请确保导入正确的打卡记录文件');
+                }
+            } else {
+                alert('数据格式不正确，请确保导入正确的打卡记录文件');
+            }
+        } catch (e) {
+            alert('文件读取失败，请确保导入正确的JSON文件');
+        }
+    };
+    reader.readAsText(file);
+}
+
+// 修改工具按钮添加函数
 function addUtilityButtons() {
     const container = document.querySelector('.container');
     const buttonDiv = document.createElement('div');
@@ -174,15 +226,33 @@ function addUtilityButtons() {
     buttonDiv.style.textAlign = 'center';
     
     const exportButton = document.createElement('button');
-    exportButton.textContent = '导出记录';
+    exportButton.textContent = '导出记录(图片)';
     exportButton.onclick = exportTasks;
     exportButton.style.marginRight = '10px';
+    
+    const exportJsonButton = document.createElement('button');
+    exportJsonButton.textContent = '导出数据';
+    exportJsonButton.onclick = exportDataToJson;
+    exportJsonButton.style.marginRight = '10px';
+    
+    const importLabel = document.createElement('label');
+    importLabel.className = 'import-button';
+    importLabel.style.marginRight = '10px';
+    importLabel.innerHTML = '导入数据<input type="file" accept=".json" style="display:none">';
+    importLabel.querySelector('input').onchange = function(e) {
+        if (e.target.files.length > 0) {
+            importDataFromJson(e.target.files[0]);
+            e.target.value = ''; // 清空选择，允许重复选择同一文件
+        }
+    };
     
     const cleanupButton = document.createElement('button');
     cleanupButton.textContent = '清理旧记录';
     cleanupButton.onclick = cleanupOldTasks;
     
     buttonDiv.appendChild(exportButton);
+    buttonDiv.appendChild(exportJsonButton);
+    buttonDiv.appendChild(importLabel);
     buttonDiv.appendChild(cleanupButton);
     container.appendChild(buttonDiv);
 }

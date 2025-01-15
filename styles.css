@@ -509,4 +509,31 @@ input[type="time"] {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
+}
+
+.import-button {
+    display: inline-block;
+    background: #1890ff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.import-button:hover {
+    opacity: 0.9;
+}
+
+.utility-buttons button,
+.utility-buttons .import-button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    background: #1890ff;
 } 
