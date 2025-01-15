@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>每日打卡</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
 </head>
 <body>
     <div class="container">
@@ -16,10 +17,10 @@
         <div class="quick-section">
             <h2>快速打卡</h2>
             <div class="quick-actions">
-                <button class="quick-action" data-task="运动">运动</button>
-                <button class="quick-action" data-task="学习">学习</button>
-                <button class="quick-action" data-task="阅读">阅读</button>
-                <button class="quick-action" data-task="打卡">打卡</button>
+                <button class="quick-action" data-task="运动">&#x1F3C3; 运动</button>
+                <button class="quick-action" data-task="学习">📚 学习</button>
+                <button class="quick-action" data-task="阅读">📖 阅读</button>
+                <button class="quick-action" data-task="打卡">✅ 打卡</button>
             </div>
             <div class="duration-picker">
                 <h3>时长选择</h3>
@@ -56,7 +57,11 @@
 
         <!-- 日历部分 -->
         <div class="calendar">
-            <div class="calendar-title" id="calendar-title"></div>
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)" class="nav-arrow">◀</button>
+                <span id="calendar-title">2025年1月</span>
+                <button onclick="changeMonth(1)" class="nav-arrow">▶</button>
+            </div>
             <div class="calendar-header">
                 <span>周日</span>
                 <span>周一</span>
@@ -66,7 +71,9 @@
                 <span>周五</span>
                 <span>周六</span>
             </div>
-            <div id="calendar-grid"></div>
+            <div id="calendar-grid">
+                <!-- 日历日期将通过 JavaScript 动态生成 -->
+            </div>
         </div>
     </div>
 
@@ -93,9 +100,7 @@
     <!-- 任务详情弹窗 -->
     <div id="task-detail-popup" class="popup hidden">
         <div class="popup-content">
-            <h3>任务详情</h3>
             <div id="task-details"></div>
-            <button onclick="closeTaskDetailPopup()">关闭</button>
         </div>
     </div>
 
@@ -124,6 +129,9 @@
         </div>
     </div>
 
+    <!-- 先加载enhanced-features.js -->
+    <script src="enhanced-features.js"></script>
+    <!-- 后加载script.js，这样它的实现会覆盖前面的版本 -->
     <script src="script.js"></script>
 </body>
 </html> 
