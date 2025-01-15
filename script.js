@@ -172,49 +172,90 @@ function exportDataToJson() {
         exportDate: new Date().toISOString()
     };
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `打卡记录_${new Date().toLocaleDateString()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const jsonString = JSON.stringify(data, null, 2);
+    
+    // 检查是否在移动设备上
+    if (/mobile/i.test(navigator.userAgent)) {
+        // 在移动设备上显示弹窗并提供复制功能
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.innerHTML = `
+            <div class="popup-content">
+                <h3>导出数据</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">点击下方按钮复制数据：</p>
+                <textarea readonly style="width: 100%; height: 100px; margin-bottom: 10px; padding: 5px; font-size: 0.8rem;">${jsonString}</textarea>
+                <button onclick="copyToClipboard(this)" class="copy-btn" style="margin-bottom: 10px;">复制数据</button>
+                <button onclick="this.parentElement.parentElement.remove()" class="close-btn">关闭</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+    } else {
+        // 在桌面设备上使用文件下载
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `打卡记录_${new Date().toLocaleDateString()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+}
+
+// 复制到剪贴板功能
+function copyToClipboard(button) {
+    const textarea = button.parentElement.querySelector('textarea');
+    textarea.select();
+    document.execCommand('copy');
+    button.textContent = '已复制！';
+    setTimeout(() => {
+        button.textContent = '复制数据';
+    }, 2000);
 }
 
 // 导入JSON数据
 function importDataFromJson(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (data && Array.isArray(data.tasks)) {
-                // 验证数据格式
-                const isValid = data.tasks.every(task => 
-                    task.id && 
-                    task.name && 
-                    task.startTime && 
-                    task.endTime && 
-                    task.date
-                );
-                
-                if (isValid) {
-                    if (confirm('导入将覆盖现有数据，是否继续？')) {
-                        tasks = data.tasks;
-                        saveTasksToStorage(tasks);
-                        renderCalendar();
-                        alert('数据导入成功！');
-                    }
-                } else {
-                    alert('数据格式不正确，请确保导入正确的打卡记录文件');
+    // 如果是文件输入
+    if (file instanceof File) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            processJsonData(e.target.result);
+        };
+        reader.readAsText(file);
+    } else {
+        // 如果是文本输入
+        processJsonData(file);
+    }
+}
+
+// 处理JSON数据
+function processJsonData(jsonString) {
+    try {
+        const data = JSON.parse(jsonString);
+        if (data && Array.isArray(data.tasks)) {
+            const isValid = data.tasks.every(task => 
+                task.id && 
+                task.name && 
+                task.startTime && 
+                task.endTime && 
+                task.date
+            );
+            
+            if (isValid) {
+                if (confirm('导入将覆盖现有数据，是否继续？')) {
+                    tasks = data.tasks;
+                    saveTasksToStorage(tasks);
+                    renderCalendar();
+                    alert('数据导入成功！');
                 }
             } else {
                 alert('数据格式不正确，请确保导入正确的打卡记录文件');
             }
-        } catch (e) {
-            alert('文件读取失败，请确保导入正确的JSON文件');
+        } else {
+            alert('数据格式不正确，请确保导入正确的打卡记录文件');
         }
-    };
-    reader.readAsText(file);
+    } catch (e) {
+        alert('文件读取失败，请确保输入正确的JSON格式');
+    }
 }
 
 // 修改工具按钮添加函数
@@ -235,16 +276,38 @@ function addUtilityButtons() {
     exportJsonButton.onclick = exportDataToJson;
     exportJsonButton.style.marginRight = '10px';
     
-    const importLabel = document.createElement('label');
-    importLabel.className = 'import-button';
-    importLabel.style.marginRight = '10px';
-    importLabel.innerHTML = '导入数据<input type="file" accept=".json" style="display:none">';
-    importLabel.querySelector('input').onchange = function(e) {
-        if (e.target.files.length > 0) {
-            importDataFromJson(e.target.files[0]);
-            e.target.value = ''; // 清空选择，允许重复选择同一文件
-        }
-    };
+    // 在移动设备上使用文本输入方式
+    if (/mobile/i.test(navigator.userAgent)) {
+        const importButton = document.createElement('button');
+        importButton.textContent = '导入数据';
+        importButton.onclick = function() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h3>导入数据</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 10px;">请粘贴之前导出的JSON数据：</p>
+                    <textarea style="width: 100%; height: 100px; margin-bottom: 10px; padding: 5px; font-size: 0.8rem;"></textarea>
+                    <button onclick="importDataFromJson(this.parentElement.querySelector('textarea').value)" style="margin-bottom: 10px;">导入</button>
+                    <button onclick="this.parentElement.parentElement.remove()" class="close-btn">取消</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        };
+        buttonDiv.appendChild(importButton);
+    } else {
+        const importLabel = document.createElement('label');
+        importLabel.className = 'import-button';
+        importLabel.style.marginRight = '10px';
+        importLabel.innerHTML = '导入数据<input type="file" accept=".json" style="display:none">';
+        importLabel.querySelector('input').onchange = function(e) {
+            if (e.target.files.length > 0) {
+                importDataFromJson(e.target.files[0]);
+                e.target.value = '';
+            }
+        };
+        buttonDiv.appendChild(importLabel);
+    }
     
     const cleanupButton = document.createElement('button');
     cleanupButton.textContent = '清理旧记录';
@@ -252,7 +315,6 @@ function addUtilityButtons() {
     
     buttonDiv.appendChild(exportButton);
     buttonDiv.appendChild(exportJsonButton);
-    buttonDiv.appendChild(importLabel);
     buttonDiv.appendChild(cleanupButton);
     container.appendChild(buttonDiv);
 }
