@@ -599,36 +599,49 @@ document.addEventListener('DOMContentLoaded', function() {
     let startY = 0;
     let startTime = 0;
     let isSwiping = false;
+    let isValidTouch = false;
     
     calendar.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         startTime = Date.now();
         isSwiping = false;
-    }, { passive: true });
+        isValidTouch = true;
+        
+        // 阻止事件冒泡
+        e.stopPropagation();
+    }, { passive: false });
     
     calendar.addEventListener('touchmove', (e) => {
-        if (!startX) return;
+        if (!isValidTouch || !startX) return;
         
         const moveX = e.touches[0].clientX - startX;
         const moveY = e.touches[0].clientY - startY;
+        const moveTime = Date.now() - startTime;
         
-        // 如果水平移动距离大于垂直移动距离，且移动距离超过10px，认为是在滑动
-        if (Math.abs(moveX) > Math.abs(moveY) && Math.abs(moveX) > 10) {
+        // 如果是垂直滚动，则允许默认行为
+        if (Math.abs(moveY) > Math.abs(moveX)) {
+            isValidTouch = false;
+            return;
+        }
+        
+        // 如果移动距离超过10px且时间小于300ms，认为是在滑动
+        if (Math.abs(moveX) > 10 && moveTime < 300) {
             isSwiping = true;
-            e.preventDefault(); // 阻止滚动
+            e.preventDefault();
+            e.stopPropagation();
         }
     }, { passive: false });
     
     calendar.addEventListener('touchend', (e) => {
-        if (!startX) return;
+        if (!isValidTouch || !startX) return;
         
         const endX = e.changedTouches[0].clientX;
         const moveX = endX - startX;
         const moveTime = Date.now() - startTime;
         
-        // 如果是滑动操作且移动距离超过50px
-        if (isSwiping && Math.abs(moveX) > 50) {
+        // 如果移动时间小于300ms且移动距离大于50px，才触发翻页
+        if (isSwiping && moveTime < 300 && Math.abs(moveX) > 50) {
             if (moveX < 0) {
                 // 向左滑动，下个月
                 changeMonth(1);
@@ -637,6 +650,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 changeMonth(-1);
             }
             e.preventDefault();
+            e.stopPropagation();
         }
         
         // 重置状态
@@ -644,6 +658,15 @@ document.addEventListener('DOMContentLoaded', function() {
         startY = 0;
         startTime = 0;
         isSwiping = false;
+        isValidTouch = false;
     }, { passive: false });
+    
+    // 阻止日历容器的点击事件冒泡
+    calendar.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('calendar-day')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, { capture: true });
 }); 
 
