@@ -453,35 +453,6 @@ function showCustomTimePicker(input) {
     });
 }
 
-// 添加触摸滑动支持
-function addTouchSupport() {
-    let startX = 0;
-    let currentX = 0;
-    
-    const calendar = document.getElementById('calendar-grid');
-    
-    calendar.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-    });
-    
-    calendar.addEventListener('touchmove', (e) => {
-        currentX = e.touches[0].clientX;
-    });
-    
-    calendar.addEventListener('touchend', () => {
-        const diff = startX - currentX;
-        if (Math.abs(diff) > 50) { // 最小滑动距离
-            if (diff > 0) {
-                // 向左滑动，下个月
-                changeMonth(1);
-            } else {
-                // 向右滑动，上个月
-                changeMonth(-1);
-            }
-        }
-    });
-}
-
 // 自动填充时间建议
 function suggestTaskTime(taskName) {
     const template = taskTemplates[taskName];
@@ -620,9 +591,6 @@ function initEnhancedFeatures() {
 
     // 添加日历导航
     addCalendarNavigation();
-
-    // 添加触摸支持
-    addTouchSupport();
 
     // 初始化移动端时间选择器
     initCustomTimePicker();
