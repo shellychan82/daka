@@ -7,6 +7,18 @@ const motivationalMessages = [
     "一步一个脚印，你正在变得更好！"
 ];
 
+// 初始化数据
+let tasks = [];
+try {
+    const storedTasks = localStorage.getItem('tasks');
+    tasks = storedTasks ? JSON.parse(storedTasks) : [];
+} catch (e) {
+    console.error('加载存储数据失败:', e);
+    tasks = [];
+}
+
+let pendingTask = null;
+
 // 检查浏览器是否支持 localStorage
 if (typeof Storage === "undefined") {
     alert('您的浏览器不支持本地存储，部分功能可能无法使用');
@@ -258,6 +270,41 @@ function processJsonData(jsonString) {
     }
 }
 
+// 表单提交处理
+document.getElementById('task-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const taskName = document.getElementById('task-name').value;
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
+    
+    pendingTask = {
+        id: Date.now(),
+        name: taskName,
+        startTime: startTime,
+        endTime: endTime,
+        date: new Date().toISOString().split('T')[0],
+        completed: false
+    };
+
+    showConfirmPopup(taskName, Math.round((new Date(`2000/01/01 ${endTime}`) - new Date(`2000/01/01 ${startTime}`)) / 60000));
+});
+
+// 显示激励弹窗
+function showMotivationPopup() {
+    const popup = document.getElementById('motivation-popup');
+    const message = document.getElementById('motivation-message');
+    const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+    
+    message.textContent = randomMessage;
+    popup.classList.remove('hidden');
+}
+
+// 关闭弹窗
+function closePopup() {
+    document.getElementById('motivation-popup').classList.add('hidden');
+}
+
 // 修改工具按钮添加函数
 function addUtilityButtons() {
     const container = document.querySelector('.container');
@@ -319,18 +366,6 @@ function addUtilityButtons() {
     container.appendChild(buttonDiv);
 }
 
-// 初始化数据
-let tasks = [];
-try {
-    const storedTasks = localStorage.getItem('tasks');
-    tasks = storedTasks ? JSON.parse(storedTasks) : [];
-} catch (e) {
-    console.error('加载存储数据失败:', e);
-    tasks = [];
-}
-
-let pendingTask = null;
-
 // 快速打卡按钮点击处理
 document.querySelectorAll('.quick-action').forEach(button => {
     button.addEventListener('click', function() {
@@ -388,209 +423,8 @@ function closeConfirmPopup() {
     pendingTask = null;
 }
 
-// 显示任务详情
-function showTaskDetails(date, dayTasks) {
-    const popup = document.getElementById('task-detail-popup');
-    const details = document.getElementById('task-details');
-    const today = new Date();
-    const selectedDate = new Date(date);
-    const diffDays = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
-    
-    // 只在过去7天内显示补卡按钮，当天不显示
-    const isWithinWeek = diffDays > 0 && diffDays <= 7;
-    
-    let html = '<h3>任务详情</h3>';
-    
-    // 只在历史日期且一周内显示补卡按钮
-    if (isWithinWeek) {
-        html += `<div class="makeup-btn-container"><button class="makeup-btn" onclick="showMakeupForm('${date}')">补卡</button></div>`;
-    }
-    
-    // 显示现有任务
-    dayTasks.forEach(task => {
-        html += `
-            <div class="task-detail-item">
-                <div class="task-content">
-                    <div class="task-name">${task.name}</div>
-                    <div class="task-time">${task.startTime} - ${task.endTime}</div>
-                </div>
-                <button class="delete-btn" onclick="deleteTask('${task.id}', '${date}')">删除</button>
-            </div>
-        `;
-    });
-    
-    // 添加关闭按钮
-    html += `<button class="close-btn" onclick="closeTaskDetailPopup()">关闭</button>`;
-    
-    details.innerHTML = html || '<p>暂无任务</p>';
-    popup.classList.remove('hidden');
-}
-
-// 显示补卡表单
-function showMakeupForm(date) {
-    const popup = document.getElementById('makeup-popup');
-    document.getElementById('makeup-date').textContent = date;
-    popup.classList.remove('hidden');
-}
-
-// 处理补卡提交
-function submitMakeup() {
-    const date = document.getElementById('makeup-date').textContent;
-    const taskName = document.getElementById('makeup-task-name').value;
-    const startTime = document.getElementById('makeup-start-time').value;
-    const endTime = document.getElementById('makeup-end-time').value;
-    
-    if (!taskName || !startTime || !endTime) {
-        alert('请填写完整信息');
-        return;
-    }
-    
-    const newTask = {
-        id: Date.now(),
-        name: taskName,
-        startTime: startTime,
-        endTime: endTime,
-        date: date,
-        completed: true,
-        isMakeup: true
-    };
-    
-    if (validateTask(newTask)) {
-        tasks.push(newTask);
-        if (saveTasksToStorage(tasks)) {
-            closeMakeupPopup();
-            showTaskDetails(date, tasks.filter(task => task.date === date));
-            renderCalendar();
-        }
-    } else {
-        alert('任务数据无效，请重试');
-    }
-}
-
-// 关闭补卡弹窗
-function closeMakeupPopup() {
-    document.getElementById('makeup-popup').classList.add('hidden');
-    document.getElementById('makeup-task-name').value = '';
-    document.getElementById('makeup-start-time').value = '';
-    document.getElementById('makeup-end-time').value = '';
-}
-
-// 关闭任务详情弹窗
-function closeTaskDetailPopup() {
-    document.getElementById('task-detail-popup').classList.add('hidden');
-}
-
-// 日历渲染
-function renderCalendar() {
-    const calendar = document.getElementById('calendar-grid');
-    calendar.innerHTML = '';
-    
-    const today = new Date();
-    const currentMonth = currentDisplayMonth.getMonth();
-    const currentYear = currentDisplayMonth.getFullYear();
-    
-    const calendarTitle = document.getElementById('calendar-title');
-    calendarTitle.textContent = `${currentYear}年${currentMonth + 1}月`;
-    
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    
-    for (let i = 0; i < firstDay.getDay(); i++) {
-        const emptyDay = document.createElement('div');
-        emptyDay.className = 'calendar-day other-month';
-        calendar.appendChild(emptyDay);
-    }
-    
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-        const dayElement = document.createElement('div');
-        dayElement.className = 'calendar-day';
-        
-        const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-        const dayTasks = tasks.filter(task => task.date === dateStr);
-        
-        if (day === today.getDate() && 
-            currentMonth === today.getMonth() && 
-            currentYear === today.getFullYear()) {
-            dayElement.classList.add('today');
-        }
-        
-        if (dayTasks.length > 0) {
-            dayElement.classList.add('has-task');
-            dayElement.addEventListener('click', () => {
-                showTaskDetails(dateStr, dayTasks);
-            });
-        } else {
-            dayElement.addEventListener('click', () => {
-                showTaskDetails(dateStr, []);
-            });
-        }
-        
-        dayElement.innerHTML = `${day}`;
-        calendar.appendChild(dayElement);
-    }
-    
-    const lastDayOfWeek = lastDay.getDay();
-    if (lastDayOfWeek < 6) {
-        for (let i = lastDayOfWeek + 1; i <= 6; i++) {
-            const emptyDay = document.createElement('div');
-            emptyDay.className = 'calendar-day other-month';
-            calendar.appendChild(emptyDay);
-        }
-    }
-}
-
-// 表单提交处理
-document.getElementById('task-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const taskName = document.getElementById('task-name').value;
-    const startTime = document.getElementById('start-time').value;
-    const endTime = document.getElementById('end-time').value;
-    
-    pendingTask = {
-        id: Date.now(),
-        name: taskName,
-        startTime: startTime,
-        endTime: endTime,
-        date: new Date().toISOString().split('T')[0],
-        completed: false
-    };
-
-    showConfirmPopup(taskName, Math.round((new Date(`2000/01/01 ${endTime}`) - new Date(`2000/01/01 ${startTime}`)) / 60000));
-});
-
-// 显示激励弹窗
-function showMotivationPopup() {
-    const popup = document.getElementById('motivation-popup');
-    const message = document.getElementById('motivation-message');
-    const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-    
-    message.textContent = randomMessage;
-    popup.classList.remove('hidden');
-}
-
-// 关闭弹窗
-function closePopup() {
-    document.getElementById('motivation-popup').classList.add('hidden');
-}
-
-// 初始化渲染
-renderCalendar(); 
-
-// 添加删除任务功能
-function deleteTask(taskId, date) {
-    if (confirm('确定要删除这个任务吗？')) {
-        tasks = tasks.filter(task => task.id !== parseInt(taskId));
-        if (saveTasksToStorage(tasks)) {
-            showTaskDetails(date, tasks.filter(task => task.date === date));
-            renderCalendar();
-        }
-    }
-} 
-
 // 在页面加载完成后添加工具按钮
 document.addEventListener('DOMContentLoaded', function() {
     addUtilityButtons();
-    renderCalendar();
 }); 
 

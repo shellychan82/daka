@@ -68,14 +68,20 @@ function renderCalendar() {
 
         // 检查是否有任务
         const dateString = `${currentDisplayMonth.getFullYear()}-${(currentDisplayMonth.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-        if (tasks.some(task => task.date === dateString)) {
+        const dayTasks = tasks.filter(task => task.date === dateString);
+        
+        if (dayTasks.length > 0) {
             dayElement.classList.add('has-task');
-            // 添加点击事件查看打卡记录
-            dayElement.addEventListener('click', () => {
-                const dayTasks = tasks.filter(task => task.date === dateString);
-                showTaskDetails(dateString, dayTasks);
-            });
         }
+
+        // 为所有日期添加点击事件
+        dayElement.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (dayTasks.length > 0) {
+                showTaskDetails(dateString, dayTasks);
+            }
+        });
 
         calendarGrid.appendChild(dayElement);
     }
@@ -182,14 +188,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 切换月份
 function changeMonth(delta) {
-    currentDisplayMonth.setMonth(currentDisplayMonth.getMonth() + delta);
+    // 创建新的Date对象而不是修改现有的
+    const newDate = new Date(currentDisplayMonth);
+    newDate.setMonth(newDate.getMonth() + delta);
+    currentDisplayMonth = newDate;
     renderCalendar();
     updateCalendarTitle();
 }
 
-// 更新日历标题
+// 更新月份标题
 function updateCalendarTitle() {
     const titleElement = document.getElementById('calendar-title');
+    if (titleElement) {
+        titleElement.textContent = `${currentDisplayMonth.getFullYear()}年${currentDisplayMonth.getMonth() + 1}月`;
+    }
+}
+
+// 更新月份标题
+function updateMonthTitle() {
+    const titleElement = document.querySelector('.calendar-nav-title');
     if (titleElement) {
         titleElement.textContent = `${currentDisplayMonth.getFullYear()}年${currentDisplayMonth.getMonth() + 1}月`;
     }
@@ -552,21 +569,6 @@ function handleSwipeEnd() {
             // 向左滑动，显示下一个月
             changeMonth(1);
         }
-    }
-}
-
-// 修改切换月份函数
-function changeMonth(delta) {
-    currentDisplayMonth.setMonth(currentDisplayMonth.getMonth() + delta);
-    renderCalendar();
-    updateCalendarTitle();
-}
-
-// 更新月份标题
-function updateMonthTitle() {
-    const titleElement = document.querySelector('.calendar-nav-title');
-    if (titleElement) {
-        titleElement.textContent = `${currentDisplayMonth.getFullYear()}年${currentDisplayMonth.getMonth() + 1}月`;
     }
 }
 
